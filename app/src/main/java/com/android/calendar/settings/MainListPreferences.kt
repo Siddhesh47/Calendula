@@ -180,7 +180,17 @@ class MainListPreferences : PreferenceFragmentCompat() {
             addOfflineCalendar()
             true
         }
+        val directSyncPreference = Preference(requireContext()).apply {
+            title = getString(R.string.direct_sync_title)
+            summary = getString(R.string.direct_sync_summary)
+            icon = ContextCompat.getDrawable(requireContext(), R.drawable.today_icon)
+        }
+        directSyncPreference.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), com.android.calendar.directsync.DirectSyncActivity::class.java))
+            true
+        }
         screen.addPreference(generalPreference)
+        screen.addPreference(directSyncPreference)
         screen.addPreference(addCaldavPreference)
         screen.addPreference(addEtesyncPreference)
         screen.addPreference(addOfflinePreference)

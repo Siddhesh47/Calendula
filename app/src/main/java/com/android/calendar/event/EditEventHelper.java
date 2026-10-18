@@ -17,6 +17,7 @@
 package com.android.calendar.event;
 
 import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -293,9 +294,40 @@ public class EditEventHelper {
     }
 
     public EditEventHelper(Context context) {
-        mService = ((AbstractCalendarActivity)context).getAsyncQueryService();
         mContextResolver = context.getContentResolver();
         this.mContext = context;
+        this.mService = new AsyncQueryService(context) {
+            @Override
+            protected void onBatchComplete(int token, Object cookie, ContentProviderResult[] results) {
+                super.onBatchComplete(token, cookie, results);
+                if (cookie instanceof CalendarEventModel) {
+                    CalendarEventModel model = (CalendarEventModel) cookie;
+                    if (model.mIsRepeatingAsk) {
+                        long eventId = model.mId;
+                        if (eventId <= 0 && results != null && results.length > 0) {
+                            for (ContentProviderResult result : results) {
+                                if (result != null && result.uri != null) {
+                                    try {
+                                        eventId = ContentUris.parseId(result.uri);
+                                        if (eventId > 0) {
+                                            break;
+                                        }
+                                    } catch (Exception ignored) {
+                                    }
+                                }
+                            }
+                        }
+                        if (eventId > 0) {
+                            long effectiveEnd = model.mAllDay
+                                    ? Utils.convertAlldayUtcToLocal(null, model.mEnd, Utils.getCurrentTimezone())
+                                    : (model.mEnd > 0 ? model.mEnd : model.mStart + android.text.format.DateUtils.HOUR_IN_MILLIS);
+                            com.android.calendar.repeatingask.RepeatingAskManager.scheduleAskForEvent(
+                                    mContext, eventId, effectiveEnd, model.mTitle);
+                        }
+                    }
+                }
+            }
+        };
     }
 
     /**
@@ -494,10 +526,10 @@ public class EditEventHelper {
         }
 
         ContentProviderOperation.Builder b;
+        Uri extendedPropUri = ExtendedProperty.contentUri(model.mCalendarAccountName, model.mCalendarAccountType);
 
         boolean hasUrl = model.mUrl != null && !model.mUrl.isBlank();
         if (hasUrl || !newEvent) {
-            Uri extendedPropUri = ExtendedProperty.contentUri(model.mCalendarAccountName, model.mCalendarAccountType);
 
             if (!newEvent) {
                 // First delete any URL extended property associated with the event so that
@@ -523,6 +555,29 @@ public class EditEventHelper {
                 }
                 ops.add(b.build());
             }
+        }
+
+        if (!newEvent) {
+            b = ContentProviderOperation.newDelete(extendedPropUri)
+                    .withSelection(EXTENDED_WHERE_EVENT_NAME, new String[] { Long.toString(model.mId), ExtendedProperty.REPEATING_ASK_NAME });
+            ops.add(b.build());
+        }
+
+        if (model.mIsRepeatingAsk) {
+            values.clear();
+            values.put(ExtendedProperties.NAME, ExtendedProperty.REPEATING_ASK_NAME);
+            values.put(ExtendedProperties.VALUE, "true");
+
+            if (newEvent) {
+                b = ContentProviderOperation.newInsert(extendedPropUri)
+                        .withValues(values);
+                b.withValueBackReference(ExtendedProperties.EVENT_ID, eventIdIndex);
+            } else {
+                values.put(ExtendedProperties.EVENT_ID, model.mId);
+                b = ContentProviderOperation.newInsert(extendedPropUri)
+                        .withValues(values);
+            }
+            ops.add(b.build());
         }
 
         boolean hasAttendeeData = model.mHasAttendeeData;
@@ -650,8 +705,19 @@ public class EditEventHelper {
             }
         }
 
-        mService.startBatch(mService.getNextToken(), null, android.provider.CalendarContract.AUTHORITY, ops,
+        mService.startBatch(mService.getNextToken(), model, android.provider.CalendarContract.AUTHORITY, ops,
                 Utils.UNDO_DELAY);
+
+        if (model.mIsRepeatingAsk && model.mId > 0) {
+            long effectiveEnd = model.mAllDay
+                    ? Utils.convertAlldayUtcToLocal(null, model.mEnd, Utils.getCurrentTimezone())
+                    : (model.mEnd > 0 ? model.mEnd : model.mStart + android.text.format.DateUtils.HOUR_IN_MILLIS);
+            com.android.calendar.repeatingask.RepeatingAskManager.scheduleAskForEvent(
+                    mContext, model.mId, effectiveEnd, model.mTitle);
+        } else if (originalModel != null && originalModel.mIsRepeatingAsk) {
+            com.android.calendar.repeatingask.RepeatingAskManager.cancelAskForEvent(
+                    mContext, model.mId);
+        }
 
         return true;
     }

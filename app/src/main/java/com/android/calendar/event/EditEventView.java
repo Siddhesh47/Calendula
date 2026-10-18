@@ -64,6 +64,7 @@ import android.widget.TextView.OnEditorActionListener;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
 
@@ -147,6 +148,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
     TextView mEndTimeHome;
     TextView mEndDateHome;
     SwitchCompat mAllDayCheckBox;
+    MaterialSwitch mRepeatingAskSwitch;
     Spinner mCalendarsSpinner;
     Button mRruleButton;
     Spinner mAvailabilitySpinner;
@@ -260,6 +262,32 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         mEndDateHome = (TextView) view.findViewById(R.id.end_date_home_tz);
         mAllDayCheckBox = view.findViewById(R.id.is_all_day);
         mRruleButton = (Button) view.findViewById(R.id.rrule);
+        mRepeatingAskSwitch = view.findViewById(R.id.repeating_ask_switch);
+        View repeatingAskRow = view.findViewById(R.id.repeating_ask_row);
+        if (repeatingAskRow != null && mRepeatingAskSwitch != null) {
+            repeatingAskRow.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mRepeatingAskSwitch.isEnabled()) {
+                        mRepeatingAskSwitch.toggle();
+                    }
+                }
+            });
+        }
+        if (mRepeatingAskSwitch != null) {
+            mRepeatingAskSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        mRrule = null;
+                        populateRepeats();
+                        mRruleButton.setEnabled(false);
+                    } else {
+                        populateRepeats();
+                    }
+                }
+            });
+        }
         mAvailabilitySpinner = (Spinner) view.findViewById(R.id.availability);
         mAccessLevelSpinner = (Spinner) view.findViewById(R.id.visibility);
         mCalendarSelectorGroupBackground = view.findViewById(R.id.calendar_selector_group_background);
@@ -486,6 +514,9 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         if (mModel.mOriginalSyncId != null) {
             enabled = false;
         }
+        if (mRepeatingAskSwitch != null && mRepeatingAskSwitch.isChecked()) {
+            enabled = false;
+        }
         mRruleButton.setOnClickListener(this);
         mRruleButton.setEnabled(enabled);
     }
@@ -567,6 +598,9 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         mRrule = rrule;
         if (mRrule != null) {
             mEventRecurrence.parse(mRrule);
+            if (mRepeatingAskSwitch != null && mRepeatingAskSwitch.isChecked()) {
+                mRepeatingAskSwitch.setChecked(false);
+            }
         }
         populateRepeats();
     }
@@ -708,7 +742,8 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         // rrrule
         // If we're making an exception we don't want it to be a repeating
         // event.
-        if (mModification == EditEventHelper.MODIFY_SELECTED) {
+        mModel.mIsRepeatingAsk = mRepeatingAskSwitch != null && mRepeatingAskSwitch.isChecked();
+        if (mModification == EditEventHelper.MODIFY_SELECTED || mModel.mIsRepeatingAsk) {
             mModel.mRrule = null;
         } else {
             mModel.mRrule = mRrule;
@@ -1000,6 +1035,10 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
             updateHeadlineColor(model.getEventColor());
         }
 
+        if (mRepeatingAskSwitch != null) {
+            mRepeatingAskSwitch.setChecked(model.mIsRepeatingAsk);
+        }
+
         populateWhen();
         populateRepeats();
         updateAttendees(model.mAttendeesList);
@@ -1190,6 +1229,9 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
                 v.setBackgroundDrawable(null);
             }
             mRruleButton.setEnabled(false);
+            if (mRepeatingAskSwitch != null) {
+                mRepeatingAskSwitch.setEnabled(false);
+            }
             if (EditEventHelper.canAddReminders(mModel)) {
                 mRemindersGroup.setVisibility(View.VISIBLE);
             } else {
@@ -1220,11 +1262,14 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
                             mOriginalPadding[3]);
                 }
             }
-            if (mModel.mOriginalSyncId == null) {
+            if (mModel.mOriginalSyncId == null && (mRepeatingAskSwitch == null || !mRepeatingAskSwitch.isChecked())) {
                 mRruleButton.setEnabled(true);
             } else {
                 mRruleButton.setEnabled(false);
                 mRruleButton.setBackgroundDrawable(null);
+            }
+            if (mRepeatingAskSwitch != null) {
+                mRepeatingAskSwitch.setEnabled(true);
             }
             mRemindersGroup.setVisibility(View.VISIBLE);
 

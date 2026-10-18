@@ -34,6 +34,11 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+
     <queries>
         <intent>
             <action android:name="android.content.SyncAdapter" />
@@ -58,7 +63,7 @@
         android:label="@string/standalone_app_label"
         android:taskAffinity="ws.xsoh.etar.task"
         android:requiredAccountType="*"
-        android:usesCleartextTraffic="false"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.Etar">
 
         <activity
@@ -97,6 +102,12 @@
 
         <activity android:name="com.android.calendar.AboutActivity">
         </activity>
+
+        <activity
+            android:name="com.android.calendar.directsync.DirectSyncActivity"
+            android:exported="false"
+            android:label="@string/direct_sync_title"
+            android:parentActivityName="com.android.calendar.AllInOneActivity" />
 
         <activity android:name="com.android.calendar.EventInfoActivity"
             android:exported="true"
@@ -261,6 +272,22 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name="com.android.calendar.repeatingask.RepeatingAskReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
             </intent-filter>
         </receiver>
 

@@ -926,6 +926,15 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                                     mView.mUrlTextView.setTextKeepState(mModel.mUrl);
                                 }
                                 break;
+                            case ExtendedProperty.REPEATING_ASK_NAME:
+                            case ExtendedProperty.REPEATING_ASK_NAME_PRIV:
+                                boolean isRepeatingAsk = "true".equalsIgnoreCase(value);
+                                mModel.mIsRepeatingAsk = isRepeatingAsk;
+                                mOriginalModel.mIsRepeatingAsk = isRepeatingAsk;
+                                if (mView != null && mView.mRepeatingAskSwitch != null) {
+                                    mView.mRepeatingAskSwitch.setChecked(isRepeatingAsk);
+                                }
+                                break;
                         }
                     }
 

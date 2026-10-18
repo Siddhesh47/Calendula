@@ -16,6 +16,7 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/event_info_headline"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -105,6 +106,18 @@
         android:layout_marginTop="-3dip"
         android:textColor="@color/event_info_headline_transparent_color"
         android:textSize="14sp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_set_next_occurrence"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="4dp"
+        android:visibility="gone"
+        android:text="@string/repeating_ask_set_next_occurrence"
+        app:icon="@drawable/ic_outline_repeat"
+        app:iconGravity="textStart" />
 
     <!-- WHERE -->
 

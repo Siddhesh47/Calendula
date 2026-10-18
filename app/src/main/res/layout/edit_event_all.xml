@@ -521,13 +521,57 @@
             app:layout_constraintStart_toEndOf="@+id/rrule_icon"
             app:layout_constraintTop_toTopOf="@+id/rrule_icon" />
 
+        <LinearLayout
+            android:id="@+id/repeating_ask_row"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="24dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/rrule_icon"
+            app:layout_constraintTop_toBottomOf="@+id/rrule">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/repeating_ask_title"
+                    style="@style/TextAppearance.EditEvent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/repeating_ask_label" />
+
+                <TextView
+                    android:id="@+id/repeating_ask_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/repeating_ask_description"
+                    android:textSize="12sp"
+                    android:textColor="?android:attr/textColorSecondary" />
+            </LinearLayout>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/repeating_ask_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/repeating_ask_description"
+                app:thumbTint="@color/preference_material_switch_color" />
+        </LinearLayout>
+
         <View
             android:id="@+id/view4"
             style="@style/EditEventSeparator"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/rrule_icon" />
+            app:layout_constraintTop_toBottomOf="@+id/repeating_ask_row" />
 
         <!-- REMINDERS -->
         <ImageView

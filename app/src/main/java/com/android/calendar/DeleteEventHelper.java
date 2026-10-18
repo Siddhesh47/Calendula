@@ -114,6 +114,7 @@ public class DeleteEventHelper {
 
             Uri uri = ContentUris.withAppendedId(deleteContentUri, id);
             mService.startDelete(mService.getNextToken(), null, uri, null, null, Utils.UNDO_DELAY);
+            com.android.calendar.repeatingask.RepeatingAskManager.cancelAskForEvent(mContext, id);
             if (mCallback != null) {
                 mCallback.run();
             }
@@ -409,6 +410,7 @@ public class DeleteEventHelper {
                 Uri uri = ContentUris.withAppendedId(deleteContentUri, id);
                 mService.startDelete(mService.getNextToken(), null, uri, null, null,
                         Utils.UNDO_DELAY);
+                com.android.calendar.repeatingask.RepeatingAskManager.cancelAskForEvent(mContext, id);
                 break;
             }
             case DELETE_ALL_FOLLOWING: {

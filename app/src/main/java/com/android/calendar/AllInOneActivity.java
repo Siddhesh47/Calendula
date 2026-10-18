@@ -243,7 +243,12 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
     @Override
     protected void onNewIntent(Intent intent) {
-        String action = intent.getAction();
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (intent != null && com.android.calendar.repeatingask.RepeatingAskConstants.ACTION_REPEATING_ASK_PICK.equals(intent.getAction())) {
+            com.android.calendar.repeatingask.RepeatingAskDialogHelper.checkAndShowPendingAsk(this);
+        }
+        String action = intent != null ? intent.getAction() : null;
         if (DEBUG)
             Log.d(TAG, "New intent received " + intent);
         // Don't change the date if we're just returning to the app's home
@@ -275,6 +280,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
         // Create notification channels
         AlertService.createChannels(this);
+        com.android.calendar.repeatingask.RepeatingAskManager.createNotificationChannel(this);
 
         // Get time from intent or icicle
         long timeMillis = -1;
@@ -643,6 +649,8 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         invalidateOptionsMenu();
 
         mCalIntentReceiver = Utils.setTimeChangesReceiver(this, mTimeChangesUpdater);
+        com.android.calendar.repeatingask.RepeatingAskDialogHelper.checkAndShowPendingAsk(this);
+        com.android.calendar.repeatingask.RepeatingAskManager.rescheduleAllPendingAsks(this);
     }
 
 
@@ -926,6 +934,9 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             String[] mimetypes = {"text/calendar", "text/x-vcalendar", "application/ics"};
             intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
             startActivityForResult(intent, REQUEST_CODE_IMPORT);
+        } else if (itemId == R.id.action_direct_sync) {
+            Intent intent = new Intent(this, com.android.calendar.directsync.DirectSyncActivity.class);
+            startActivity(intent);
         } else if (itemId == R.id.action_view_settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
             intent.putExtra(SettingsActivityKt.EXTRA_SHOW_FRAGMENT, ViewDetailsPreferences.class.getName());

@@ -377,6 +377,21 @@
     <!-- A label in a multiple-choice list for the specifying that an event does
          not repeat -->
     <string name="does_not_repeat">One-time event</string>
+    <!-- Repeating-Ask event type -->
+    <string name="repeating_ask_label">Repeating-Ask</string>
+    <string name="repeating_ask_description">Ask for next date and time after event ends</string>
+    <string name="repeating_ask_badge">Repeating-Ask</string>
+    <string name="repeating_ask_notification_channel_name">Repeating-Ask</string>
+    <string name="repeating_ask_notification_channel_desc">Notifications asking for the next date and time of completed events</string>
+    <string name="repeating_ask_notification_title">Schedule next: %s</string>
+    <string name="repeating_ask_notification_text">Event has ended. Tap to pick the next date and time.</string>
+    <string name="repeating_ask_dialog_title">Schedule Next Occurrence</string>
+    <string name="repeating_ask_dialog_message">\"%s\" has ended. When would you like to schedule the next occurrence?</string>
+    <string name="repeating_ask_pick_date_time">Pick Date &amp; Time</string>
+    <string name="repeating_ask_dismiss">Not Now</string>
+    <string name="repeating_ask_stop_repeating">Don\'t Repeat Again</string>
+    <string name="repeating_ask_set_next_occurrence">Set next occurrence</string>
+    <string name="repeating_ask_occurrence_scheduled">Next occurrence scheduled</string>
     <!-- Part of a description of an repeating event. This part states the date when a repeating
          event ends. The part before the semi-colon describes how it repeats.
          e.g. Every 2 weeks; until 1/1/2030 [CHAR LIMIT=21] -->
@@ -867,4 +882,28 @@
     <string name="chips_action_cancel">Cancel</string>
     <!-- Text displayed on the drop down item that is shown when app doesn't have Contact permission. This item will open dialog to request permission. [CHAR LIMIT=50] -->
     <string name="chips_permission_text">Allow contacts suggestions</string>
+
+    <!-- Direct Device-to-Device Sync Strings -->
+    <string name="direct_sync_title">Direct Device Sync</string>
+    <string name="direct_sync_summary">Sync calendars directly between phones over local Wi-Fi / Hotspot</string>
+    <string name="direct_sync_shared_calendar_name">Shared Calendar</string>
+    <string name="direct_sync_host_title">Host / Share Mode</string>
+    <string name="direct_sync_host_desc">Allow nearby devices on this Wi-Fi to sync with this phone</string>
+    <string name="direct_sync_server_running">Server active at %s</string>
+    <string name="direct_sync_server_stopped">Server stopped</string>
+    <string name="direct_sync_discovered_devices">Nearby Devices</string>
+    <string name="direct_sync_searching">Searching for nearby devices...</string>
+    <string name="direct_sync_no_devices">No devices found on this Wi-Fi yet. Make sure the other phone has Host Mode ON.</string>
+    <string name="direct_sync_manual_connect">Manual Connection</string>
+    <string name="direct_sync_ip_hint">Peer IP (e.g. 192.168.1.50)</string>
+    <string name="direct_sync_button">Sync Now</string>
+    <string name="direct_sync_syncing">Synchronizing events...</string>
+    <string name="direct_sync_success">Sync complete! %1$d events synced.</string>
+    <string name="direct_sync_failed">Sync failed: %s</string>
+    <string name="direct_sync_stats_title">Shared Calendar Status</string>
+    <string name="direct_sync_event_count">%d shared events</string>
+    <string name="direct_sync_last_synced">Last synced: %s</string>
+    <string name="direct_sync_never">Never</string>
+    <string name="direct_sync_export_share">Export / Quick Share</string>
+    <string name="direct_sync_import">Import Shared File</string>
 </resources>

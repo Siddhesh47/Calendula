@@ -22,18 +22,33 @@ public class ExtendedProperty {
     public static final String URL = "url";
 
     /**
+     * Extended property name for marking an event as a Repeating-Ask event.
+     */
+    public static final String REPEATING_ASK_NAME = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.ws.xsoh.etar.repeating_ask";
+    public static final String REPEATING_ASK_NAME_PRIV = "private:" + REPEATING_ASK_NAME;
+    public static final String REPEATING_ASK_KEY = "repeating_ask";
+
+    /**
+     * Extended property name for marking that an ended repeating-ask event has been answered or rescheduled.
+     */
+    public static final String REPEATING_ASK_ANSWERED_NAME = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.ws.xsoh.etar.repeating_ask_answered";
+    public static final String REPEATING_ASK_ANSWERED_NAME_PRIV = "private:" + REPEATING_ASK_ANSWERED_NAME;
+
+    /**
      * Gets the Content URI for Extended Properties after adding the account name and type, and
      * setting the `CalendarContract.CALLER_IS_SYNCADAPTER` parameter to `true`.
      * @param accountName The name of the account owner of the extended property.
      * @param accountType The type of the account owner of the extended property.
      */
     public static Uri contentUri(String accountName, String accountType) {
-        Uri extendedPropUri = ExtendedProperties.CONTENT_URI;
-        extendedPropUri = extendedPropUri.buildUpon()
-                .appendQueryParameter(CalendarContract.CALLER_IS_SYNCADAPTER, "true")
-                .appendQueryParameter(Calendars.ACCOUNT_NAME, accountName)
-                .appendQueryParameter(Calendars.ACCOUNT_TYPE, accountType)
-                .build();
-        return extendedPropUri;
+        Uri.Builder builder = ExtendedProperties.CONTENT_URI.buildUpon()
+                .appendQueryParameter(CalendarContract.CALLER_IS_SYNCADAPTER, "true");
+        if (accountName != null) {
+            builder.appendQueryParameter(Calendars.ACCOUNT_NAME, accountName);
+        }
+        if (accountType != null) {
+            builder.appendQueryParameter(Calendars.ACCOUNT_TYPE, accountType);
+        }
+        return builder.build();
     }
 }

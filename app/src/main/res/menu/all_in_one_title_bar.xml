@@ -59,6 +59,12 @@
         android:orderInCategory="7"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_direct_sync"
+        android:alphabeticShortcut="s"
+        android:title="@string/direct_sync_title"
+        android:orderInCategory="6"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_view_settings"
         android:alphabeticShortcut="v"
         android:title="@string/view_settings"

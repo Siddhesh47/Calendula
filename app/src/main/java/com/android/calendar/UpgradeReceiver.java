@@ -24,6 +24,7 @@ public class UpgradeReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {
         Utils.trySyncAndDisableUpgradeReceiver(context);
+        com.android.calendar.repeatingask.RepeatingAskManager.rescheduleAllPendingAsks(context);
     }
 
 }

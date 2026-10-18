@@ -16,6 +16,12 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/info_action_next_occurrence"
+        android:alphabeticShortcut="n"
+        android:icon="@drawable/ic_outline_repeat"
+        android:title="@string/repeating_ask_set_next_occurrence"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
     <item android:id="@+id/info_action_edit"
         android:alphabeticShortcut="e"
         android:icon="@drawable/outline_edit_event"

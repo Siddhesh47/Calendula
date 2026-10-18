@@ -73,6 +73,7 @@ public class CalendarEventModel implements Serializable {
     public String mLocation = null;
     public String mDescription = null;
     public String mUrl = null;
+    public boolean mIsRepeatingAsk = false;
     public String mRrule = null;
     public String mExDate = null;
     public String mOrganizer = null;
@@ -173,6 +174,8 @@ public class CalendarEventModel implements Serializable {
             mUrl = url;
         }
 
+        mIsRepeatingAsk = intent.getBooleanExtra(ExtendedProperty.REPEATING_ASK_KEY, false);
+
         int availability = intent.getIntExtra(Events.AVAILABILITY, -1);
         if (availability != -1) {
             mAvailability = availability;
@@ -258,6 +261,7 @@ public class CalendarEventModel implements Serializable {
         mLocation = null;
         mDescription = null;
         mUrl = null;
+        mIsRepeatingAsk = false;
         mRrule = null;
         mOrganizer = null;
         mOrganizerDisplayName = null;
@@ -341,6 +345,7 @@ public class CalendarEventModel implements Serializable {
         result = prime * result + (int) (mCalendarId ^ (mCalendarId >>> 32));
         result = prime * result + ((mDescription == null) ? 0 : mDescription.hashCode());
         result = prime * result + ((mUrl == null) ? 0 : mUrl.hashCode());
+        result = prime * result + (mIsRepeatingAsk ? 1231 : 1237);
         result = prime * result + ((mDuration == null) ? 0 : mDuration.hashCode());
         result = prime * result + (int) (mEnd ^ (mEnd >>> 32));
         result = prime * result + (mGuestsCanInviteOthers ? 1231 : 1237);
@@ -427,6 +432,10 @@ public class CalendarEventModel implements Serializable {
                 return false;
             }
         } else if (!mUrl.equals(other.mUrl)) {
+            return false;
+        }
+
+        if (mIsRepeatingAsk != other.mIsRepeatingAsk) {
             return false;
         }
 
@@ -524,6 +533,10 @@ public class CalendarEventModel implements Serializable {
                 return false;
             }
         } else if (!mUrl.equals(originalModel.mUrl)) {
+            return false;
+        }
+
+        if (mIsRepeatingAsk != originalModel.mIsRepeatingAsk) {
             return false;
         }
 

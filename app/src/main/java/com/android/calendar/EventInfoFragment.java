@@ -56,6 +56,9 @@ import android.provider.CalendarContract.Colors;
 import android.provider.CalendarContract.Events;
 import android.provider.CalendarContract.Reminders;
 import android.provider.CalendarContract.ExtendedProperties;
+import com.android.calendar.repeatingask.RepeatingAskDialogHelper;
+import com.android.calendar.repeatingask.RepeatingAskManager;
+import com.android.calendar.repeatingask.RepeatingAskModel;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds;
 import android.provider.ContactsContract.Intents;
@@ -401,6 +404,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     // able to be used as a state marker for configuration changes.
     private int mTentativeUserSetResponse = Attendees.ATTENDEE_STATUS_NONE;
     private boolean mIsRepeating;
+    private boolean mIsRepeatingAsk = false;
     private boolean mHasAlarm;
     private int mMaxReminders;
     private String mCalendarAllowedReminders;
@@ -410,6 +414,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     private TextView mWhenDateTime;
     private TextView mWhere;
     private TextView mWhenRepeat;
+    private View mBtnSetNextOccurrence;
     private TextView mEventOrganizer;
     private TextView mCalendarName;
     private ExpandableTextView mDesc;
@@ -839,6 +844,15 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         mDesc =  mView.findViewById(R.id.description);
         mUrl =  mView.findViewById(R.id.url);
         mHeadlines = mView.findViewById(R.id.event_info_headline);
+        mBtnSetNextOccurrence = mView.findViewById(R.id.btn_set_next_occurrence);
+        if (mBtnSetNextOccurrence != null) {
+            mBtnSetNextOccurrence.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showSetNextOccurrencePicker();
+                }
+            });
+        }
         mLongAttendees = (AttendeesView) mView.findViewById(R.id.long_attendee_list);
 
         mResponseRadioGroup = (RadioGroup) mView.findViewById(R.id.response_value);
@@ -1164,6 +1178,9 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             shareEvent(ShareType.EXPORT_SAF);
         } else if (itemId == R.id.info_action_duplicate) {
             duplicateEvent();
+        } else if (itemId == R.id.info_action_next_occurrence) {
+            showSetNextOccurrencePicker();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -1604,7 +1621,12 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                     eventRecurrence, true);
         }
         if (repeatString == null) {
-            mWhenRepeat.setVisibility(View.GONE);
+            if (mIsRepeatingAsk && mWhenRepeat != null) {
+                mWhenRepeat.setVisibility(View.VISIBLE);
+                setTextCommon(view, R.id.when_repeat, mContext.getString(R.string.repeating_ask_badge));
+            } else if (mWhenRepeat != null) {
+                mWhenRepeat.setVisibility(View.GONE);
+            }
         } else {
             setTextCommon(view, R.id.when_repeat, repeatString);
         }
@@ -1671,6 +1693,14 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         if (mEventUrl != null && !mEventUrl.isBlank()) {
             mUrl.setText(mEventUrl);
         }
+        if (mIsRepeatingAsk && mWhenRepeat != null) {
+            mWhenRepeat.setVisibility(View.VISIBLE);
+            setTextCommon(mView, R.id.when_repeat, mContext.getString(R.string.repeating_ask_badge));
+        }
+        if (mBtnSetNextOccurrence != null) {
+            mBtnSetNextOccurrence.setVisibility((mIsRepeatingAsk && mCanModifyCalendar) ? View.VISIBLE : View.GONE);
+        }
+        updateMenu();
     }
 
     private void updateWhenTextView(View view) {
@@ -1920,6 +1950,9 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                     button.setVisibility(View.VISIBLE);
                 }
             }
+            if (mBtnSetNextOccurrence != null) {
+                mBtnSetNextOccurrence.setVisibility((mIsRepeatingAsk && mCanModifyCalendar) ? View.VISIBLE : View.GONE);
+            }
             if ((!mIsDialog && !mIsTabletConfig ||
                     mWindowStyle == EventInfoFragment.FULL_WINDOW_STYLE) && mMenu != null) {
                 mActivity.invalidateOptionsMenu();
@@ -1952,6 +1985,36 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             changeColor.setVisible(mCanModifyCalendar);
             changeColor.setEnabled(mCanModifyCalendar);
         }
+        MenuItem nextOccurrence = mMenu.findItem(R.id.info_action_next_occurrence);
+        if (nextOccurrence != null) {
+            nextOccurrence.setVisible(mIsRepeatingAsk && mCanModifyCalendar);
+            nextOccurrence.setEnabled(mIsRepeatingAsk && mCanModifyCalendar);
+        }
+    }
+
+    private void showSetNextOccurrencePicker() {
+        if (mActivity == null || mEventId <= 0) {
+            return;
+        }
+        RepeatingAskModel model = RepeatingAskManager.getRepeatingAskEventById(mActivity, mEventId);
+        if (model == null) {
+            model = new RepeatingAskModel();
+            model.id = mEventId;
+            model.title = mTitle != null && mTitle.getText() != null ? mTitle.getText().toString() : "";
+            model.startMillis = mStartMillis;
+            model.endMillis = mEndMillis;
+            model.allDay = mAllDay;
+            if (mEventCursor != null && !mEventCursor.isClosed() && mEventCursor.getCount() > 0) {
+                try {
+                    model.calendarId = mEventCursor.getLong(EVENT_INDEX_CALENDAR_ID);
+                    model.description = mEventCursor.getString(EVENT_INDEX_DESCRIPTION);
+                    model.location = mEventCursor.getString(EVENT_INDEX_EVENT_LOCATION);
+                    model.timezone = mEventCursor.getString(EVENT_INDEX_EVENT_TIMEZONE);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        RepeatingAskDialogHelper.showDateTimePicker(mActivity, model);
     }
 
     private void updateAttendees(View view) {
@@ -2086,6 +2149,10 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                 case ExtendedProperty.URL_NAME:
                 case ExtendedProperty.URL_NAME_PRIV:
                     mEventUrl = value;
+                    break;
+                case ExtendedProperty.REPEATING_ASK_NAME:
+                case ExtendedProperty.REPEATING_ASK_NAME_PRIV:
+                    mIsRepeatingAsk = "true".equalsIgnoreCase(value);
                     break;
                 default:
                     Log.i(TAG, "Got an unhandled extended property: " + name);
